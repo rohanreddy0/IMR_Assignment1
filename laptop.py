@@ -101,6 +101,11 @@ class LaptopPilot:
             self.sim_init = False     
 
         msg.header.stamp += self.sim_time_offset
+
+        self.lidar_timestamp_s = msg.header.stamp #we want the lidar measurement timestamp here
+        self.lidar_data = np.zeros((len(msg.ranges), 2)) #specify length of the lidar data
+        self.lidar_data[:,0] = msg.ranges # use ranges as a placeholder, workout northings in Task 4
+        self.lidar_data[:,1] = msg.angles # use angles as a placeholder, workout eastings in Task 4
         self.datalog.log(msg, topic_name="/lidar")
 
     def groundtruth_callback(self, msg):

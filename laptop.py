@@ -116,9 +116,13 @@ class LaptopPilot:
         msg.header.stamp += self.sim_time_offset
 
         self.lidar_timestamp_s = msg.header.stamp #we want the lidar measurement timestamp here
+
+        # FIXME: May need commenting out
         self.lidar_data = np.zeros((len(msg.ranges), 2)) #specify length of the lidar data
         self.lidar_data[:,0] = msg.ranges # use ranges as a placeholder, workout northings in Task 4
         self.lidar_data[:,1] = msg.angles # use angles as a placeholder, workout eastings in Task 4
+        
+        # FIXME: May need moving to the end of the fuction so it is plotted in the e frame
         self.datalog.log(msg, topic_name="/lidar")
 
         # b to e frame
@@ -286,8 +290,8 @@ class LaptopPilot:
         #  TODO: Implement your controller here                                        #
 
         wheel_speed_msg = Vector3Stamped()
-        wheel_speed_msg.vector.x = 1 * np.pi  # Right wheel 1 rev/s = 1*pi rad/s
-        wheel_speed_msg.vector.y = 2 * np.pi  # Left wheel 1 rev/s = 2*pi rad/s
+        wheel_speed_msg.vector.x = 0.5 * np.pi  # Right wheel 1 rev/s = 1*pi rad/s
+        wheel_speed_msg.vector.y = 2.5 * np.pi  # Left wheel 1 rev/s = 2*pi rad/s
 
         self.cmd_wheelrate_right = wheel_speed_msg.vector.x
         self.cmd_wheelrate_left = wheel_speed_msg.vector.y

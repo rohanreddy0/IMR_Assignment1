@@ -17,6 +17,7 @@ from zeroros.rate import Rate
 # add more libraries here
 from model_feeg6043 import ActuatorConfiguration
 from math_feeg6043 import Vector
+from model_feeg6043 import rigid_body_kinematics
 
 class LaptopPilot:
     def __init__(self, simulation):
@@ -44,7 +45,7 @@ class LaptopPilot:
         wheel_distance = 0.16 # measure this 
         wheel_diameter = 0.075 # measure this
         self.ddrive = ActuatorConfiguration(wheel_distance, wheel_diameter) #look at your tutorial and see how to use this
-        
+        self.initialise_pose = True # False once the pose is initialised 
           
         # path
         self.northings_path = []
@@ -179,8 +180,8 @@ class LaptopPilot:
         q[0] = self.measured_wheelrate_right # wheel rate rad/s (measured)
         q[1] = self.measured_wheelrate_left # wheel rate rad/s (measured)
         u = self.ddrive.fwd_kinematics(q)         
-        
-           
+
+
         """Main control loop
 
         Your code should go here.
@@ -203,6 +204,47 @@ class LaptopPilot:
             # logs the data            
             self.datalog.log(msg, topic_name="/aruco")
 
+            ###### wait for the first sensor info to initialize the pose ######
+            if self.initialise_pose == True:
+                self.est_pose_northings_m = self.measured_pose_northings_m
+                self.est_pose_eastings_m = self.measured_pose_eastings_m
+                self.est_pose_yaw_rad = self.measured_pose_yaw_rad
+
+                # get current time and determine timestep
+                self.t_prev = datetime.utcnow().timestamp() #initialise the time
+                self.t = 0 #elapsed time
+                time.sleep(0.1) #wait for approx a timestep before proceeding
+                
+                # path and tragectory are initialised
+                self.initialise_pose = False
+
+        if self.initialise_pose != True:  
+            # TODO: <actuator forward kinematic to determine u >
+            
+            #determine the time step
+            t_now = datetime.utcnow().timestamp()        
+                    
+            dt = t_now - self.t_prev #timestep from last estimate
+            self.t += dt #add to the elapsed time
+            self.t_prev = t_now #update the previous timestep for the next loop
+
+            # take current pose estimate and update by twist
+            p_robot = Vector(3)
+            p_robot[0,0] = self.est_pose_northings_m
+            p_robot[1,0] = self.est_pose_eastings_m
+            p_robot[2,0] = self.est_pose_yaw_rad
+                                
+            p_robot = rigid_body_kinematics(p_robot, u, dt)
+            p_robot[2] = p_robot[2] % (2 * np.pi)  # deal with angle wrapping          
+
+            # update for show_laptop.py            
+            self.est_pose_northings_m = p_robot[0, 0]
+            self.est_pose_eastings_m = p_robot[1, 0]
+            self.est_pose_yaw_rad = p_robot[2, 0]
+
+            # TODO: <parse and log /est_pose>
+
+        
 
         # > Think < #
         ################################################################################

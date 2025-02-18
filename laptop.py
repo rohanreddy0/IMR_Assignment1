@@ -121,6 +121,29 @@ class LaptopPilot:
         self.lidar_data[:,1] = msg.angles # use angles as a placeholder, workout eastings in Task 4
         self.datalog.log(msg, topic_name="/lidar")
 
+        # b to e frame
+        p_eb = Vector(3)
+        p_eb[0] = self.est_pose_northings_m #robot pose northings (see Task 3)
+        p_eb[1] = self.est_pose_eastings_m #robot pose eastings (see Task 3)
+        p_eb[2] = self.est_pose_yaw_rad #robot pose yaw (see Task 3)
+
+        # m to e frame
+        self.lidar_data = np.zeros((len(msg.ranges), 2))        
+                    
+        z_lm = Vector(2)        
+        # for each map measurement
+        for i in range(len(msg.ranges)):
+            z_lm[0] = msg.ranges[i]
+            z_lm[1] = msg.angles[i]
+                
+            t_em = self.lidar.rangeangle_to_loc(p_eb, z_lm) # see tutotial
+
+            self.lidar_data[i,0] = t_em[0] # Northings
+            self.lidar_data[i,1] = t_em[1] # Eastings
+
+        # this filters out any 
+        self.lidar_data = self.lidar_data[~np.isnan(self.lidar_data).any(axis=1)]
+
     def groundtruth_callback(self, msg):
         """This callback receives the odometry ground truth from the simulator."""
         self.datalog.log(msg, topic_name="/groundtruth")

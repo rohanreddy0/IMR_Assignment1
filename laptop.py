@@ -18,6 +18,7 @@ from zeroros.rate import Rate
 from model_feeg6043 import ActuatorConfiguration
 from math_feeg6043 import Vector
 from model_feeg6043 import rigid_body_kinematics
+from model_feeg6043 import RangeAngleKinematics
 
 class LaptopPilot:
     def __init__(self, simulation):
@@ -73,6 +74,9 @@ class LaptopPilot:
         # lidar
         self.lidar_timestamp_s = None
         self.lidar_data = None
+        lidar_xb = 0.1 # location of lidar centre in b-frame primary axis
+        lidar_yb = 0.0 # location of lidar centre in b-frame secondary axis
+        self.lidar = RangeAngleKinematics(lidar_xb, lidar_yb)
         ###############################################################        
 
         self.datalog = DataLogger(log_dir="logs")

@@ -173,6 +173,14 @@ class LaptopPilot:
             self.true_wheel_speed_sub.stop()
 
     def infinite_loop(self):
+        ################### Motion Model ##############################
+        # convert true wheel speeds in to twist
+        q = Vector(2)            
+        q[0] = self.measured_wheelrate_right # wheel rate rad/s (measured)
+        q[1] = self.measured_wheelrate_left # wheel rate rad/s (measured)
+        u = self.ddrive.fwd_kinematics(q)         
+        
+           
         """Main control loop
 
         Your code should go here.

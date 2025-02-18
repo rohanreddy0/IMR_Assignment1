@@ -15,6 +15,8 @@ from zeroros.messages import LaserScan, Vector3Stamped, Pose, PoseStamped, Heade
 from zeroros.datalogger import DataLogger
 from zeroros.rate import Rate
 # add more libraries here
+from model_feeg6043 import ActuatorConfiguration
+from math_feeg6043 import Vector
 
 class LaptopPilot:
     def __init__(self, simulation):
@@ -37,7 +39,13 @@ class LaptopPilot:
         print("Connecting to robot with IP", self.robot_ip)
         self.aruco_driver = ArUcoUDPDriver(aruco_params, parent=self)
 
-        ############# INITIALISE ATTRIBUTES ##########        
+        ############# INITIALISE ATTRIBUTES ##########  
+        # modelling params
+        wheel_distance = 0.16 # measure this 
+        wheel_diameter = 0.075 # measure this
+        self.ddrive = ActuatorConfiguration(wheel_distance, wheel_diameter) #look at your tutorial and see how to use this
+        
+          
         # path
         self.northings_path = []
         self.eastings_path = []        
